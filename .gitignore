@@ -1,0 +1,36 @@
+# ┃ Outputs
+# ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫ #
+
+## Binaries
+**/bin
+**/obj
+
+## ccls
+.ccls
+.ccls-cache
+compile_commands.json
+
+# ┃ Generated Workspaces
+# ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫ #
+
+## Xcode
+*.xcworkspace
+*.xcodeproj
+
+## Visual Studio
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs
+
+## Visual Studio Code
+.vscode
+
+# ┃ System Files
+# ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫ #
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
