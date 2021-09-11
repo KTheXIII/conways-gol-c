@@ -32,8 +32,8 @@ void GOL_BoardSimulate(GOL_Board* board) {
 
     for (int32_t i = 0; i < height; i++) {
         for (int32_t j = 0; j < width; j++) {
-            state = GOL_BoardGetCellCPState(board, j, i);
             sum   = GOL_BoardCountNeighbors(board, j, i);
+            state = GOL_BoardGetCellCPState(board, j, i);
 
             if (state == 0 && sum == 3)
                 state = 1;
@@ -42,8 +42,8 @@ void GOL_BoardSimulate(GOL_Board* board) {
             else
                 state = GOL_BoardGetCellCPState(board, j, i);
 
-            //printf("cell: %d,%d, state: %s, prev: %s, sum: %d\n",
-            //        j, i, state ? "1" : "0", prev ? "1" : "0", sum);
+            ////printf("cell: %d,%d, state: %s, prev: %s, sum: %d\n",
+            ////        j, i, state ? "1" : "0", prev ? "1" : "0", sum);
 
             GOL_BoardSetCellState(board, j, i, state);
         }
@@ -79,10 +79,9 @@ int32_t GOL_BoardCountNeighbors(GOL_Board* board, int32_t x, int32_t y) {
         ny = y + i;
         for (int32_t j = -1; j < 2; j++) {
             nx = x + j;
-
+            if (nx == x && ny == y) continue;
             state = GOL_BoardGetCellCPState(board, nx, ny);
-            if (state && nx != x && ny != y)
-                count++;
+            if (state) count++;
         }
     }
     return count;

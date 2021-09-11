@@ -45,10 +45,10 @@ int32_t main(int32_t argc, char const* argv[]) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 
-    //int32_t width  = 160;
-    //int32_t height = 90;
-    int32_t width  = 80;
-    int32_t height = 45;
+    int32_t width  = 160;
+    int32_t height = 90;
+    //int32_t width  = 80;
+    //int32_t height = 45;
 
     SDL_Texture* texture = SDL_CreateTexture(renderer,
                                              SDL_PIXELFORMAT_ABGR8888,
@@ -67,12 +67,8 @@ int32_t main(int32_t argc, char const* argv[]) {
     srand(time(NULL));
     for (int32_t i = 0; i < height; i++) {
         for (int32_t j = 0; j < width; j++) {
-            int32_t v = rand() % 100;
-            if (v > 50) {
-                GOL_BoardSetBothCellState(board, j, i, 1);
-            } else {
-                GOL_BoardSetBothCellState(board, j, i, 0);
-            }
+            int32_t v = rand() % 2;
+            GOL_BoardSetCellState(board, j, i, v);
         }
     }
 
@@ -125,12 +121,8 @@ int32_t main(int32_t argc, char const* argv[]) {
         if (current_r == 0 && last_r == 1)
             for (int32_t i = 0; i < height; i++) {
                 for (int32_t j = 0; j < width; j++) {
-                    int32_t v = rand() % 100;
-                    if (v > 60) {
-                        GOL_BoardSetCellState(board, j, i, 1);
-                    } else {
-                        GOL_BoardSetCellState(board, j, i, 0);
-                    }
+                    int32_t v = rand() % 2;
+                    GOL_BoardSetCellState(board, j, i, v);
                 }
             }
         if (current_s == 0 && last_s == 1)
