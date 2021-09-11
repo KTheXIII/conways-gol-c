@@ -29,7 +29,7 @@ int32_t main(int32_t argc, char const* argv[]) {
     window = SDL_CreateWindow(
         APPLICATION_TITLE,           // window title
         SDL_WINDOWPOS_UNDEFINED,     // initial x position
-        -800,     // initial y position
+        SDL_WINDOWPOS_UNDEFINED,     // initial y position
         WIDTH,                       // width, in pixels
         HEIGHT,                      // height, in pixels
         SDL_WINDOW_OPENGL            // flags - see below
@@ -45,8 +45,12 @@ int32_t main(int32_t argc, char const* argv[]) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 
-    int32_t width  = 160;
-    int32_t height = 90;
+    //int32_t width  = 1280;
+    //int32_t height = 720;
+    int32_t width  = 320;
+    int32_t height = 180;
+    //int32_t width  = 160;
+    //int32_t height = 90;
     //int32_t width  = 80;
     //int32_t height = 45;
 
@@ -54,7 +58,7 @@ int32_t main(int32_t argc, char const* argv[]) {
                                              SDL_PIXELFORMAT_ABGR8888,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              width, height);
-    GOL_Board*     board = GOL_ConstructBoard(width, height);
+    GOL_Board* board = GOL_ConstructBoard(width, height);
     GOL_Image* image = GOL_ConstructImage(width, height, 4);
 
     for (int32_t i = 0; i < height; i++) {
