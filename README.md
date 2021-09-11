@@ -7,3 +7,4 @@ Conway's Game of Life in C with SDL2.
   - SDL2
   - [GNU Make](https://www.gnu.org/software/make/)
 
+

@@ -6,70 +6,11 @@
 
 #include <SDL2/SDL.h>
 
+#include "GOL_Image.h"
+
 #define MAYBE_UNUSED(x) (void)(x)
 
 #define APPLICATION_TITLE "Conway's Game of Life (SDL2)"
-
-typedef struct {
-    int32_t width;
-    int32_t height;
-    int32_t channels;
-
-    uint8_t* buffer;
-} GOL_Image;
-typedef struct {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t alpha;
-} GOL_Color;
-
-GOL_Image* GOL_ConstructImage(int32_t width, int32_t height, int32_t channels) {
-    GOL_Image* image = (GOL_Image*)malloc(sizeof(GOL_Image));
-    image->width     = width;
-    image->height    = height;
-    image->channels  = channels;
-    image->buffer    = (uint8_t*)malloc(width * height * channels * sizeof(uint8_t));
-    return image;
-}
-void GOL_DestructImage(GOL_Image* image) {
-    free(image->buffer);
-    free(image);
-}
-void GOL_ImageSetPixel(GOL_Image* image,
-                       int32_t x, int32_t y,
-                       uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) {
-    if (x > -1 && x < image->width && y > -1 && y < image->height) {
-        int32_t index = (y * image->channels) * image->width + (x * image->channels);
-        image->buffer[index + 0] = red;
-        image->buffer[index + 1] = green;
-        image->buffer[index + 2] = blue;
-        image->buffer[index + 3] = alpha;
-    }
-}
-void GOL_ImageSetPixelColor(GOL_Image* image,
-                            int32_t x, int32_t y,
-                            GOL_Color const* color) {
-    if (x > -1 && x < image->width && y > -1 && y < image->height) {
-        int32_t index = (y * image->channels) * image->width + (x * image->channels);
-        image->buffer[index + 0] = color->red;
-        image->buffer[index + 1] = color->green;
-        image->buffer[index + 2] = color->blue;
-        image->buffer[index + 3] = color->alpha;
-    }
-}
-uint8_t* GOL_ImageGetBuffer(GOL_Image* image) {
-    return image->buffer;
-}
-int32_t GOL_ImageGetHeight(GOL_Image* image) {
-    return image->height;
-}
-int32_t GOL_ImageGetWidth(GOL_Image* image) {
-    return image->width;
-}
-int32_t GOL_ImageGetChannels(GOL_Image* image) {
-    return image->channels;
-}
 
 int32_t main(int32_t argc, char const* argv[]) {
     MAYBE_UNUSED(argc);
@@ -88,7 +29,7 @@ int32_t main(int32_t argc, char const* argv[]) {
     window = SDL_CreateWindow(
         APPLICATION_TITLE,           // window title
         SDL_WINDOWPOS_UNDEFINED,     // initial x position
-        SDL_WINDOWPOS_UNDEFINED,     // initial y position
+        -800,     // initial y position
         WIDTH,                       // width, in pixels
         HEIGHT,                      // height, in pixels
         SDL_WINDOW_OPENGL            // flags - see below
@@ -108,8 +49,8 @@ int32_t main(int32_t argc, char const* argv[]) {
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, uv_surf);
     //SDL_FreeSurface(uv_surf);
 
-    int32_t width  = 128;
-    int32_t height = 128;
+    int32_t width  = 64;
+    int32_t height = 64;
 
     SDL_Texture* texture = SDL_CreateTexture(renderer,
                                              SDL_PIXELFORMAT_ABGR8888,
@@ -141,8 +82,14 @@ int32_t main(int32_t argc, char const* argv[]) {
 
     memcpy(board_cp, board, width * height);
 
+    uint32_t current_time = SDL_GetTicks();
+    uint32_t last_update  = current_time;
+    uint32_t delay_update = 250;  // ms
+
     uint8_t is_running = 1;
     while(is_running) {
+        current_time = SDL_GetTicks();
+
         // Handle inputs
         switch(event.type) {
             case SDL_QUIT:
@@ -164,10 +111,19 @@ int32_t main(int32_t argc, char const* argv[]) {
                 break;
         }
         // Update
-        for (int32_t i = 0; i < height; i++) {
-            for (int32_t j = 0; j < width; j++) {
-
+        if (current_time - last_update > delay_update) {
+            for (int32_t i = 0; i < height; i++) {
+                for (int32_t j = 0; j < width; j++) {
+                    int32_t v = rand() % 100;
+                    if (v > 50) {
+                        board[i * width + j] = 1;
+                    } else {
+                        board[i * width + j] = 0;
+                    }
+                }
             }
+
+            last_update = current_time;
         }
 
         // Render
@@ -180,7 +136,8 @@ int32_t main(int32_t argc, char const* argv[]) {
                 }
             }
         }
-        SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image), width * 4 * sizeof(uint8_t));
+        SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image),
+                          width * GOL_ImageGetChannels(image) * sizeof(uint8_t));
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);

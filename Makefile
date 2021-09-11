@@ -1,6 +1,6 @@
 CC?=clang
 SDL2FLAGS=$(shell pkg-config sdl2 --cflags --libs)
-CFLAGS  = -std=c18 -Wextra -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow
+CFLAGS  = -std=c18 -Wextra -Wall -Wpedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow
 CFLAGS += -Isrc
 
 .PHONY: all msg clean fullclean
@@ -9,6 +9,7 @@ BIN_DIR     = bin
 OBJ_DIR     = obj
 
 GENERATED := $(OBJ_DIR)/main.o
+GENERATED += $(OBJ_DIR)/GOL_Image.o
 
 all: outdir $(BIN_DIR)/conway
 
@@ -21,6 +22,10 @@ $(BIN_DIR)/conway: $(GENERATED)
 
 $(OBJ_DIR)/main.o: src/main.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/GOL_Image.o: src/GOL_Image.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 clean:
 	rm -rf $(BIN_DIR) $(OBJ_DIR)
 
