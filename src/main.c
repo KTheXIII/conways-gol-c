@@ -1,12 +1,12 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 #include <SDL2/SDL.h>
 
 #include "GOL_Image.h"
+#include "GOL_Board.h"
 
 #define MAYBE_UNUSED(x) (void)(x)
 
@@ -20,8 +20,8 @@ int32_t main(int32_t argc, char const* argv[]) {
     SDL_Window   *window;    // SDL Window handler
     SDL_Renderer *renderer;  // SDL Renderer Handler
 
-    int32_t WIDTH  = 512;
-    int32_t HEIGHT = 512;
+    int32_t WIDTH  = 1280;
+    int32_t HEIGHT = 720;
 
     SDL_Init(SDL_INIT_VIDEO);  // Initialize SDL2
 
@@ -45,17 +45,14 @@ int32_t main(int32_t argc, char const* argv[]) {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 
-    //SDL_Surface* uv_surf = SDL_LoadBMP("assets/uvgrid.bmp");
-    //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, uv_surf);
-    //SDL_FreeSurface(uv_surf);
-
-    int32_t width  = 64;
-    int32_t height = 64;
+    int32_t width  = 160;
+    int32_t height = 90;
 
     SDL_Texture* texture = SDL_CreateTexture(renderer,
                                              SDL_PIXELFORMAT_ABGR8888,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              width, height);
+    GOL_Board*     board = GOL_ConstructBoard(width, height);
     GOL_Image* image = GOL_ConstructImage(width, height, 4);
 
     for (int32_t i = 0; i < height; i++) {
@@ -65,30 +62,29 @@ int32_t main(int32_t argc, char const* argv[]) {
     }
     SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image), width * 4 * sizeof(uint8_t));
 
-    uint8_t* board_cp = (uint8_t*)malloc(width * height * sizeof(uint8_t));
-    uint8_t* board    = (uint8_t*)malloc(width * height * sizeof(uint8_t));
-
     srand(time(NULL));
     for (int32_t i = 0; i < height; i++) {
         for (int32_t j = 0; j < width; j++) {
             int32_t v = rand() % 100;
             if (v > 50) {
-                board[i * width + j] = 1;
+                GOL_BoardSetBothCellState(board, j, i, 1);
             } else {
-                board[i * width + j] = 0;
+                GOL_BoardSetBothCellState(board, j, i, 0);
             }
         }
     }
 
-    memcpy(board_cp, board, width * height);
-
     uint32_t current_time = SDL_GetTicks();
     uint32_t last_update  = current_time;
-    uint32_t delay_update = 250;  // ms
+    uint32_t delay_update = 33;  // ms
+
+    uint8_t last_r = 0;
+    uint8_t current_r = 0;
 
     uint8_t is_running = 1;
     while(is_running) {
         current_time = SDL_GetTicks();
+        last_r = current_r;
 
         // Handle inputs
         switch(event.type) {
@@ -96,10 +92,14 @@ int32_t main(int32_t argc, char const* argv[]) {
                 is_running = 0;
                 break;
             case SDL_KEYDOWN:
+                if (event.key.keysym.scancode == SDL_SCANCODE_R)
+                    current_r = 1;
                 break;
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     is_running = 0;
+                if (event.key.keysym.scancode == SDL_SCANCODE_R)
+                    current_r = 0;
                 break;
             case SDL_MOUSEMOTION:
                 break;
@@ -111,25 +111,27 @@ int32_t main(int32_t argc, char const* argv[]) {
                 break;
         }
         // Update
-        if (current_time - last_update > delay_update) {
+        if (current_r == 0 && last_r == 1)
             for (int32_t i = 0; i < height; i++) {
                 for (int32_t j = 0; j < width; j++) {
                     int32_t v = rand() % 100;
                     if (v > 50) {
-                        board[i * width + j] = 1;
+                        GOL_BoardSetCellState(board, j, i, 1);
                     } else {
-                        board[i * width + j] = 0;
+                        GOL_BoardSetCellState(board, j, i, 0);
                     }
                 }
             }
 
+        if (current_time - last_update > delay_update) {
+            GOL_BoardSimulate(board);
             last_update = current_time;
         }
 
         // Render
         for (int32_t i = 0; i < height; i++) {
             for (int32_t j = 0; j < width; j++) {
-                if (board[i * width + j]) {
+                if (GOL_BoardGetCellState(board, j, i)) {
                     GOL_ImageSetPixel(image, j, i, 255, 255, 255, 255);
                 } else {
                     GOL_ImageSetPixel(image, j, i, 0, 0, 0, 255);
@@ -148,9 +150,9 @@ int32_t main(int32_t argc, char const* argv[]) {
         SDL_PollEvent(&event);
     }
 
+    // Free resources
     GOL_DestructImage(image);
-    free(board_cp);
-    free(board);
+    GOL_DestructBoard(board);
 
     // Delete texture memory
     SDL_DestroyTexture(texture);
