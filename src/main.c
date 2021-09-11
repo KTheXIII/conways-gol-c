@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #include <SDL2/SDL.h>
 
@@ -106,8 +108,8 @@ int32_t main(int32_t argc, char const* argv[]) {
     //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, uv_surf);
     //SDL_FreeSurface(uv_surf);
 
-    int32_t width    = 256;
-    int32_t height   = 256;
+    int32_t width  = 128;
+    int32_t height = 128;
 
     SDL_Texture* texture = SDL_CreateTexture(renderer,
                                              SDL_PIXELFORMAT_ABGR8888,
@@ -121,6 +123,23 @@ int32_t main(int32_t argc, char const* argv[]) {
         }
     }
     SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image), width * 4 * sizeof(uint8_t));
+
+    uint8_t* board_cp = (uint8_t*)malloc(width * height * sizeof(uint8_t));
+    uint8_t* board    = (uint8_t*)malloc(width * height * sizeof(uint8_t));
+
+    srand(time(NULL));
+    for (int32_t i = 0; i < height; i++) {
+        for (int32_t j = 0; j < width; j++) {
+            int32_t v = rand() % 100;
+            if (v > 50) {
+                board[i * width + j] = 1;
+            } else {
+                board[i * width + j] = 0;
+            }
+        }
+    }
+
+    memcpy(board_cp, board, width * height);
 
     uint8_t is_running = 1;
     while(is_running) {
@@ -145,8 +164,24 @@ int32_t main(int32_t argc, char const* argv[]) {
                 break;
         }
         // Update
+        for (int32_t i = 0; i < height; i++) {
+            for (int32_t j = 0; j < width; j++) {
+
+            }
+        }
 
         // Render
+        for (int32_t i = 0; i < height; i++) {
+            for (int32_t j = 0; j < width; j++) {
+                if (board[i * width + j]) {
+                    GOL_ImageSetPixel(image, j, i, 255, 255, 255, 255);
+                } else {
+                    GOL_ImageSetPixel(image, j, i, 0, 0, 0, 255);
+                }
+            }
+        }
+        SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image), width * 4 * sizeof(uint8_t));
+
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
@@ -157,6 +192,9 @@ int32_t main(int32_t argc, char const* argv[]) {
     }
 
     GOL_DestructImage(image);
+    free(board_cp);
+    free(board);
+
     // Delete texture memory
     SDL_DestroyTexture(texture);
 
