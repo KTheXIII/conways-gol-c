@@ -1,6 +1,6 @@
 CC?=clang
 SDL2FLAGS=$(shell pkg-config sdl2 --cflags --libs)
-CFLAGS  = -std=c18 -Wextra -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow -fsanitize=address
+CFLAGS  = -std=c18 -Wextra -Wall -pedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow
 CFLAGS += -Isrc
 
 .PHONY: all msg clean fullclean
