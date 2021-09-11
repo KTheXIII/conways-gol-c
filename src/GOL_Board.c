@@ -1,6 +1,7 @@
 #include "GOL_Board.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 GOL_Board* GOL_ConstructBoard(int32_t width, int32_t height) {
     GOL_Board* board    = (GOL_Board*)malloc(sizeof(GOL_Board));
@@ -24,22 +25,25 @@ void GOL_BoardResize(GOL_Board* board, int32_t width, int32_t height) {
 void GOL_BoardSimulate(GOL_Board* board) {
     int32_t const width  = board->width;
     int32_t const height = board->height;
-    int32_t neighbors = 0;
-    uint8_t state     = 0;
+    int32_t sum  = 0;
+    uint8_t state = 0;
     for (int32_t i = 0; i < width * height; i++)
         board->cells_cp[i] = board->cells[i];
 
     for (int32_t i = 0; i < height; i++) {
         for (int32_t j = 0; j < width; j++) {
-            neighbors = GOL_BoardCountNeighbors(board, j, i);
-            state     = GOL_BoardGetCellCPState(board, j, i);
+            state = GOL_BoardGetCellCPState(board, j, i);
+            sum   = GOL_BoardCountNeighbors(board, j, i);
 
-            if (state == 0 && neighbors == 3)
+            if (state == 0 && sum == 3)
                 state = 1;
-            else if (state == 1 && (neighbors < 2 || neighbors > 3))
+            else if (state == 1 && (sum < 2 || sum > 3))
                 state = 0;
             else
                 state = GOL_BoardGetCellCPState(board, j, i);
+
+            //printf("cell: %d,%d, state: %s, prev: %s, sum: %d\n",
+            //        j, i, state ? "1" : "0", prev ? "1" : "0", sum);
 
             GOL_BoardSetCellState(board, j, i, state);
         }
