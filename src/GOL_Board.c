@@ -4,11 +4,11 @@
 #include <stdio.h>
 
 GOL_Board* GOL_ConstructBoard(int32_t width, int32_t height) {
-    GOL_Board* board    = (GOL_Board*)malloc(sizeof(GOL_Board));
-    board->width    = width;
-    board->height   = height;
-    board->cells    = (uint8_t*)malloc(width * height * sizeof(uint8_t));
-    board->cells_cp = (uint8_t*)malloc(width * height * sizeof(uint8_t));
+    GOL_Board* board = (GOL_Board*)malloc(sizeof(GOL_Board));
+    board->width     = width;
+    board->height    = height;
+    board->cells     = (uint8_t*)malloc(width * height * sizeof(uint8_t));
+    board->cells_cp  = (uint8_t*)malloc(width * height * sizeof(uint8_t));
     return board;
 }
 void GOL_DestructBoard(GOL_Board* board) {
@@ -41,9 +41,6 @@ void GOL_BoardSimulate(GOL_Board* board) {
                 state = 0;
             else
                 state = GOL_BoardGetCellCPState(board, j, i);
-
-            ////printf("cell: %d,%d, state: %s, prev: %s, sum: %d\n",
-            ////        j, i, state ? "1" : "0", prev ? "1" : "0", sum);
 
             GOL_BoardSetCellState(board, j, i, state);
         }
