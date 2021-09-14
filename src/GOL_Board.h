@@ -11,6 +11,14 @@ typedef struct {
     uint8_t* cells_cp;
 } GOL_Board;
 
+/**
+ * \brief Construct Game of Life Board.
+ *
+ * \param width  Cell width
+ * \param height Cell height
+ *
+ * \return GOL_Board
+ */
 GOL_Board* GOL_ConstructBoard(int32_t width, int32_t height);
 void GOL_DestructBoard(GOL_Board* board);
 void GOL_BoardResize(GOL_Board* board, int32_t width, int32_t height);

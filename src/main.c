@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "GOL_Image.h"
 #include "GOL_Board.h"
@@ -32,7 +32,7 @@ int32_t main(int32_t argc, char const* argv[]) {
         SDL_WINDOWPOS_UNDEFINED,     // initial y position
         WIDTH,                       // width, in pixels
         HEIGHT,                      // height, in pixels
-        SDL_WINDOW_OPENGL            // flags - see below
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE          // flags
     );
     // Check that the window was successfully created
     if (window == NULL) {
@@ -47,6 +47,8 @@ int32_t main(int32_t argc, char const* argv[]) {
 
     //int32_t width  = 1280;
     //int32_t height = 720;
+    //int32_t width  = 640;
+    //int32_t height = 360;
     int32_t width  = 320;
     int32_t height = 180;
     //int32_t width  = 160;
@@ -78,18 +80,33 @@ int32_t main(int32_t argc, char const* argv[]) {
 
     uint32_t current_time = SDL_GetTicks();
     uint32_t last_update  = current_time;
-    uint32_t delay_update = 125;  // ms
 
-    uint8_t last_r = 0;
+    uint32_t delay_delta   = 25;   // ms
+    uint32_t delay_default = 75;  // ms
+    uint32_t delay_update  = delay_default;  // ms
+
+    uint8_t last_r    = 0;
     uint8_t current_r = 0;
-    uint8_t last_s = 0;
     uint8_t current_s = 0;
+    uint8_t last_s    = 0;
+    uint8_t current_m = 0;
+    uint8_t last_m    = 0;
+    uint8_t current_j = 0;
+    uint8_t last_j    = 0;
+    uint8_t current_k = 0;
+    uint8_t last_k    = 0;
+
+    uint8_t is_manual_mode = 0;
 
     uint8_t is_running = 1;
     while(is_running) {
         current_time = SDL_GetTicks();
         last_r = current_r;
         last_s = current_s;
+        last_m = current_m;
+
+        last_j = current_j;
+        last_k = current_k;
 
         // Handle inputs
         switch(event.type) {
@@ -101,6 +118,13 @@ int32_t main(int32_t argc, char const* argv[]) {
                     current_r = 1;
                 if (event.key.keysym.scancode == SDL_SCANCODE_S)
                     current_s = 1;
+                if (event.key.keysym.scancode == SDL_SCANCODE_M)
+                    current_m = 1;
+
+                if (event.key.keysym.scancode == SDL_SCANCODE_J)
+                    current_j = 1;
+                if (event.key.keysym.scancode == SDL_SCANCODE_K)
+                    current_k = 1;
                 break;
             case SDL_KEYUP:
                 if (event.key.keysym.sym == SDLK_ESCAPE
@@ -111,6 +135,13 @@ int32_t main(int32_t argc, char const* argv[]) {
                     current_r = 0;
                 if (event.key.keysym.scancode == SDL_SCANCODE_S)
                     current_s = 0;
+                if (event.key.keysym.scancode == SDL_SCANCODE_M)
+                    current_m = 0;
+
+                if (event.key.keysym.scancode == SDL_SCANCODE_J)
+                    current_j = 0;
+                if (event.key.keysym.scancode == SDL_SCANCODE_K)
+                    current_k = 0;
                 break;
             case SDL_MOUSEMOTION:
                 break;
@@ -131,9 +162,21 @@ int32_t main(int32_t argc, char const* argv[]) {
             }
         if (current_s == 0 && last_s == 1)
             GOL_BoardSimulate(board);
+        if (current_m == 0 && last_m == 1)
+            is_manual_mode = !is_manual_mode;
+
+        if (current_j == 0 && last_j == 1 && delay_update > 0) {
+            delay_update -= delay_delta;
+            printf("%u ms\n", delay_update);
+        }
+        if (current_k == 0 && last_k == 1) {
+            delay_update += delay_delta;
+            printf("%u ms\n", delay_update);
+        }
 
         if (current_time - last_update > delay_update) {
-            GOL_BoardSimulate(board);
+            if (!is_manual_mode)
+                GOL_BoardSimulate(board);
             last_update = current_time;
         }
 
