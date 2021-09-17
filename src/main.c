@@ -20,6 +20,7 @@ int32_t main(int32_t argc, char const* argv[]) {
     SDL_Window   *window;    // SDL Window handler
     SDL_Renderer *renderer;  // SDL Renderer Handler
 
+    // Window width and height
     int32_t WIDTH  = 512;
     int32_t HEIGHT = 512;
 
@@ -32,7 +33,7 @@ int32_t main(int32_t argc, char const* argv[]) {
         SDL_WINDOWPOS_UNDEFINED,     // initial y position
         WIDTH,                       // width, in pixels
         HEIGHT,                      // height, in pixels
-        SDL_WINDOW_OPENGL            // flags - see below
+        SDL_WINDOW_OPENGL            // flags
     );
     // Check that the window was successfully created
     if (window == NULL) {
@@ -41,14 +42,12 @@ int32_t main(int32_t argc, char const* argv[]) {
         return 1;
     }
 
+    // Setup SDL renderer
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 
-    //SDL_Surface* uv_surf = SDL_LoadBMP("assets/uvgrid.bmp");
-    //SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, uv_surf);
-    //SDL_FreeSurface(uv_surf);
-
+    // Set the play area
     int32_t width  = 64;
     int32_t height = 64;
 
@@ -56,6 +55,7 @@ int32_t main(int32_t argc, char const* argv[]) {
                                              SDL_PIXELFORMAT_ABGR8888,
                                              SDL_TEXTUREACCESS_STREAMING,
                                              width, height);
+    // Create image object
     GOL_Image* image = GOL_ConstructImage(width, height, 4);
 
     for (int32_t i = 0; i < height; i++) {
@@ -63,11 +63,15 @@ int32_t main(int32_t argc, char const* argv[]) {
             GOL_ImageSetPixel(image, j, i, 255, 0, 255, 255);
         }
     }
-    SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image), width * 4 * sizeof(uint8_t));
+    // Upload the image to the texture
+    SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image),
+            width * GOL_ImageGetChannels(image) * sizeof(uint8_t));
 
+    // Create two copies of the same board size
     uint8_t* board_cp = (uint8_t*)malloc(width * height * sizeof(uint8_t));
     uint8_t* board    = (uint8_t*)malloc(width * height * sizeof(uint8_t));
 
+    // Generate the seed
     srand(time(NULL));
     for (int32_t i = 0; i < height; i++) {
         for (int32_t j = 0; j < width; j++) {
@@ -80,8 +84,10 @@ int32_t main(int32_t argc, char const* argv[]) {
         }
     }
 
+    // Copy the boards memory onto its copy
     memcpy(board_cp, board, width * height);
 
+    // Setup the time for delay between simulation step
     uint32_t current_time = SDL_GetTicks();
     uint32_t last_update  = current_time;
     uint32_t delay_update = 250;  // ms
@@ -112,42 +118,46 @@ int32_t main(int32_t argc, char const* argv[]) {
         }
         // Update
         if (current_time - last_update > delay_update) {
+            // Generate random value onto the board
+            // TODO: Create an algoritm for Conway's Game of Life
             for (int32_t i = 0; i < height; i++) {
                 for (int32_t j = 0; j < width; j++) {
-                    int32_t v = rand() % 100;
-                    if (v > 50) {
-                        board[i * width + j] = 1;
-                    } else {
-                        board[i * width + j] = 0;
-                    }
+                    board[i * width + j] = rand() % 2;
                 }
             }
 
+            // Reset the last_update
             last_update = current_time;
         }
 
         // Render
+
+        // Draw the board onto the image
         for (int32_t i = 0; i < height; i++) {
             for (int32_t j = 0; j < width; j++) {
-                if (board[i * width + j]) {
+                if (board[i * width + j]) {  // Set 1 to white
                     GOL_ImageSetPixel(image, j, i, 255, 255, 255, 255);
-                } else {
+                } else {                     // Set 0 to black
                     GOL_ImageSetPixel(image, j, i, 0, 0, 0, 255);
                 }
             }
         }
+        // Update the texture data with the new image data
         SDL_UpdateTexture(texture, NULL, GOL_ImageGetBuffer(image),
                           width * GOL_ImageGetChannels(image) * sizeof(uint8_t));
 
+        // Set draw color to black
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
+        // Upload the texture to the SDL renderer
         SDL_RenderCopy(renderer, texture, NULL, NULL);
-        SDL_RenderPresent(renderer);
+        SDL_RenderPresent(renderer);  // Show image on the screen
 
         SDL_PollEvent(&event);
     }
 
+    // Memory clean up for the image and the board
     GOL_DestructImage(image);
     free(board_cp);
     free(board);
