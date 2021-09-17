@@ -29,7 +29,7 @@ int32_t main(int32_t argc, char const* argv[]) {
     window = SDL_CreateWindow(
         APPLICATION_TITLE,           // window title
         SDL_WINDOWPOS_UNDEFINED,     // initial x position
-        -800,     // initial y position
+        SDL_WINDOWPOS_UNDEFINED,     // initial y position
         WIDTH,                       // width, in pixels
         HEIGHT,                      // height, in pixels
         SDL_WINDOW_OPENGL            // flags - see below
