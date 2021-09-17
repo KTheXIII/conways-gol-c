@@ -4,7 +4,7 @@ SDL2_LIB      = $(shell pkg-config sdl2 --libs)
 CFLAGS  = -std=c18 -Wextra -Wall -Wpedantic -Werror -Wshadow -Wstrict-aliasing -Wstrict-overflow
 CFLAGS += -Isrc $(SDL2_INCLUDES)
 
-.PHONY: all msg clean fullclean
+.PHONY: all msg clean
 
 BIN_DIR = bin
 OBJ_DIR = obj
@@ -20,7 +20,6 @@ outdir:
 	@mkdir -p $(OBJ_DIR)
 
 $(BIN_DIR)/conway: $(OBJ_FILES)
-	@echo $(OBJ_FILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(SDL2_LIB)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
