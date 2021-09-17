@@ -6,11 +6,12 @@ CFLAGS += -Isrc $(SDL2_INCLUDES)
 
 .PHONY: all msg clean fullclean
 
-BIN_DIR     = bin
-OBJ_DIR     = obj
+BIN_DIR = bin
+OBJ_DIR = obj
+SRC_DIR = src
 
-GENERATED := $(OBJ_DIR)/main.o
-GENERATED += $(OBJ_DIR)/GOL_Image.o
+SRC_FILES = $(wildcard $(SRC_DIR)/**.c)                             # Find all the .c files in SRC_DIR
+OBJ_FILES = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_FILES))  # Replace files with .c to .o
 
 all: outdir $(BIN_DIR)/conway
 
@@ -18,17 +19,13 @@ outdir:
 	@mkdir -p $(BIN_DIR)
 	@mkdir -p $(OBJ_DIR)
 
-$(BIN_DIR)/conway: $(GENERATED)
+$(BIN_DIR)/conway: $(OBJ_FILES)
+	@echo $(OBJ_FILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(SDL2_LIB)
 
-$(OBJ_DIR)/main.o: src/main.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(OBJ_DIR)/GOL_Image.o: src/GOL_Image.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BIN_DIR) $(OBJ_DIR)
-
-fullclean: clean
+	rm -rf $(BIN_DIR)/* $(OBJ_DIR)/*
 
